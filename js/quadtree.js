@@ -47,27 +47,54 @@ class QuadTree {
     subdivide () {
         // Algoritmo
         // 1: Crear hijos: qt_northeast , qt_northwest , qt_southeast ,qt_southwest
+        let parent_x = this.boundary.x;
+        let parent_y = this.boundary.y;
+        let parent_w = this.boundary.w;
+        let parent_h = this.boundary.h;
+
+        let half_width = parent_w/2;
+        let half_height = parent_h/2;
+
+        let center_northeast = {x:parent_x-half_width,y:parent_y+half_height};
+        let center_northwest = {x:parent_x+half_width,y:parent_y+half_height};
+        let center_southeast = {x:parent_x-half_width,y:parent_y-half_height};
+        let center_southwest = {x:parent_x+half_width,y:parent_y-half_height};
+
+        let rect_northeast = new Rectangle(center_northeast.x,center_northeast.y,half_width,half_height);
+        let rect_northwest = new Rectangle(center_northwest.x,center_northwest.y,half_width,half_height);
+        let rect_southeast = new Rectangle(center_southeast.x,center_southeast.y,half_width,half_height);
+        let rect_southwest = new Rectangle(center_southwest.x,center_southwest.y,half_width,half_height);
         // 2: Asignar los QuadTree creados a cada hijo
-        // this.northeast = qt_northeast;
-        // this.northwest = qt_northwest;
-        // this.southeast = qt_southeast;
-        // this.southwest = qt_southwest;
+        this.northeast = new QuadTree(rect_northeast,this.capacity);
+        this.northwest = new QuadTree(rect_northwest,this.capacity);
+        this.southeast = new QuadTree(rect_southeast,this.capacity);
+        this.southwest = new QuadTree(rect_southwest,this.capacity);
         // 3.- Hacer: this.divided <- true
+        this.divided = true;
     }
 
 
     insert ( point ){
         // Algoritmo
         // 1: Si el punto no esta en los limites ( boundary ) del quadtree Return
+        if(!this.boundary.contains(point)){
+            return;
+        }
         // 2: Si ( this.points.length ) < ( this.capacity ),
+        if(this.points.length < this.capacity){
         // 2.Insertamos en el vector this.points
-        // Sino
+            this.points.push(point);    
+        }else{
         // 2.Dividimos si aun no ha sido dividido
+            if(!this.divided)
+                this.subdivide();
         // 2.Insertamos recursivamente en los hijos.
-        // this.northeast.insert ( point );
-        // this.northwest.insert ( point );
-        // this.southeast.insert ( point );
-        // this.southwest.insert ( point );
+            this.northeast.insert ( point );
+            this.northwest.insert ( point );
+            this.southeast.insert ( point );
+            this.southwest.insert ( point );
+        }
+        
     }
 
     show () {
