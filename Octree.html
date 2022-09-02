@@ -5,9 +5,144 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Octree</title>
+    <style>
+        body { margin: 0; }
+    </style>
     <script type="text/javascript" src="js/octree.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/OrbitControls.js"></script>
 </head>
 <body>
-    
+    <script>
+        function animate () {
+            requestAnimationFrame( animate );
+
+            controls.update();
+            renderer.render( scene, camera );
+        };
+
+        function draw ( tree , level ) {
+            let min = tree.boundary.min;
+            let max = tree.boundary.max;
+            let vertices = [];
+
+            vertices.push( max.x, max.y, max.z );
+            vertices.push( min.x, max.y, max.z ); // 0, 1
+
+            vertices.push( min.x, max.y, max.z );
+            vertices.push( min.x, min.y, max.z ); // 1, 2
+
+            vertices.push( min.x, min.y, max.z );
+            vertices.push( max.x, min.y, max.z ); // 2, 3
+
+            vertices.push( max.x, min.y, max.z );
+            vertices.push( max.x, max.y, max.z ); // 3, 0
+
+            vertices.push( max.x, max.y, min.z );
+            vertices.push( min.x, max.y, min.z ); // 4, 5
+
+            vertices.push( min.x, max.y, min.z );
+            vertices.push( min.x, min.y, min.z ); // 5, 6
+
+            vertices.push( min.x, min.y, min.z );
+            vertices.push( max.x, min.y, min.z ); // 6, 7
+
+            vertices.push( max.x, min.y, min.z );
+            vertices.push( max.x, max.y, min.z ); // 7, 4
+
+            vertices.push( max.x, max.y, max.z );
+            vertices.push( max.x, max.y, min.z ); // 0, 4
+
+            vertices.push( min.x, max.y, max.z );
+            vertices.push( min.x, max.y, min.z ); // 1, 5
+
+            vertices.push( min.x, min.y, max.z );
+            vertices.push( min.x, min.y, min.z ); // 2, 6
+
+            vertices.push( max.x, min.y, max.z );
+            vertices.push( max.x, min.y, min.z ); // 3, 7
+        
+            const geometry = new THREE.BufferGeometry();
+            const color    = getRandomColor();
+            geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+            const segment = new THREE.LineSegments(geometry,new THREE.LineBasicMaterial( {
+                color: color,
+                linewidth: level*1.2,
+                toneMapped: true,
+                linecap: 'round', //ignored by WebGLRenderer
+                linejoin:  'round' //ignored by WebGLRe derer
+            } ));
+            
+            scene.add( segment );
+
+            let points = tree.points;
+            for ( let i = 0 ; i < points.length ; i++) {
+                const geometry = new THREE.SphereGeometry( 0.4, 32, 16 );
+                const material = new THREE.MeshBasicMaterial( { color: color } );
+                const sphere = new THREE.Mesh( geometry, material );
+                sphere.position.x = points[ i ].x;
+                sphere.position.y = points[ i ].y;
+                sphere.position.z = points[ i ].z;
+                scene.add( sphere );
+            }
+        }
+
+        function analizeChildren ( children , level ) {
+            for ( let i = 0 ; i < children.length ; i++) {
+                let child   = children[ i ];
+                draw( child , level );
+                analizeChildren( child.subTrees , level + 1 );
+            }
+        }
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+
+
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true,antialias:true });
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        const controls = new OrbitControls( camera, renderer.domElement );
+
+        camera.position.z = 25;
+
+
+        let min = new Point( -20 , -20 , -20 );
+        let max = new Point( 20 , 20 , 20 );
+        let box = new Box( min , max );
+        let tree = new Octree( box , 3);
+        tree.insert(new Point(1,1,1));
+        tree.insert(new Point(1,2,3));
+        tree.insert(new Point(1,3,3));
+        tree.insert(new Point(10,1,1));
+        tree.insert(new Point(1,12,-13));
+        tree.insert(new Point(1,13,1));
+        tree.insert(new Point(11,1,1));
+        tree.insert(new Point(1,1,-11));
+        tree.insert(new Point(1,13,-20));
+        tree.insert(new Point(1,-1,-12));
+        tree.insert(new Point(-13,11,13));
+        tree.insert(new Point(-12,-12,-12));
+
+
+        draw( tree );
+        analizeChildren( tree.subTrees , 2 );
+
+
+        controls.update();
+        animate();
+    </script>
 </body>
 </html>

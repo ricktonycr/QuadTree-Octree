@@ -85,6 +85,7 @@ class Octree {
         this.points   = [];
         this.divided  = false;
         this.subTrees = [];
+        this.segment  = null;
     }
 
     split () {
