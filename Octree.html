@@ -69,7 +69,7 @@
 
         const limit = 40;
         const total = limit * 2;
-
+        const maxPoints = 6;
         function agregar () {
             while(scene.children.length > 0){ 
                 removeObject3D(scene.children[0]);
@@ -138,8 +138,8 @@
                 tree.color = color
             geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
             const segment = new THREE.LineSegments(geometry,new THREE.LineBasicMaterial( {
-                color: color,
-                linewidth: level*1.2,
+                color: "lightblue",
+                linewidth: 2,
                 toneMapped: false,
                 linecap: 'round', //ignored by WebGLRenderer
                 linejoin:  'round' //ignored by WebGLRe derer
@@ -149,7 +149,7 @@
 
             let points = tree.points;
             for ( let i = 0 ; i < points.length ; i++) {
-                const geometry = new THREE.SphereGeometry( 0.4, 16, 16 );
+                const geometry = new THREE.SphereGeometry( 0.5, 16, 16 );
                 const material = new THREE.MeshBasicMaterial( { color: color } );
                 const sphere = new THREE.Mesh( geometry, material );
                 sphere.position.x = points[ i ].x;
@@ -213,7 +213,7 @@
         let min = new Point( -limit , -limit , -limit );
         let max = new Point( limit , limit , limit );
         let box = new Box( min , max );
-        let tree = new Octree( box , 3);
+        let tree = new Octree( box , maxPoints);
         tree.insert(new Point(1,1,1));
         // tree.insert(new Point(1,2,3));
         // tree.insert(new Point(1,3,3));
