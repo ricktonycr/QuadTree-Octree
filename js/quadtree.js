@@ -33,6 +33,12 @@ class Rectangle {
 
         return (difX < sumX && difY < sumY) ? true : false;
     }
+    containsRectagle(){
+
+
+
+    }
+    
 }
 
 class QuadTree {
@@ -102,6 +108,9 @@ class QuadTree {
         strokeWeight(1);
         noFill();
         rectMode(CENTER);
+
+         
+       
         rect(this.boundary.x,this.boundary.y,this.boundary.w*2,this.boundary.h*2);
         if( this.divided ) {
             this.northeast.show();
@@ -109,11 +118,36 @@ class QuadTree {
             this.southeast.show();
             this.southwest.show();
         }
-
+        stroke(255);
         for (let p of this.points ){
             strokeWeight(4);
             point(p.x,p.y);
         }
+    }
+
+    query(range,found){
+        if(!found){
+            found = [];
+        }
+        if (!this.boundary.intersects(range)){
+            return found;
+        }else{
+            for( let p of this.points){
+                if(range.contains(p)){
+                    found.push(p);
+                }
+            }
+            if(this.divided){
+                
+                this.northeast.query(range,found);
+                this.northwest.query(range,found);
+                this.southeast.query(range,found);
+                this.southwest.query(range,found);
+            }
+
+        }
+        return found;   
+
     }
 }
     
