@@ -24,7 +24,47 @@ function setup() {
 let qt;
 let count = 0;
 let size = 700;
-let range = new Rectangle(0,0,30,30);
+let posx = 0;
+let posy = 0;
+let range = new Rectangle(posx,posy,30,30);
+
+function izquierda(){
+    posx = posx - 5;
+    range = new Rectangle(posx,posy,30,30);
+}
+
+function derecha(){
+    posx = posx + 5;
+    range = new Rectangle(posx,posy,30,30);
+}
+
+function arriba (){
+    posy = posy - 5;
+    range = new Rectangle(posx,posy,30,30);
+}
+
+function abajo(){
+    posy = posy + 5;
+    range = new Rectangle(posx,posy,30,30);
+}
+
+
+
+function resultQuery(){
+    range = new Box(minQuery,maxQuery);
+    let points = [];
+    tree.query(range,points);
+    if(points.length==0){
+        alert("No existen puntos en el range.");
+    }else{
+        for (let i = 0; i < points.length; i++) {
+            const element = points[i];
+            alert("("+Math.round(element.x,2)+","+Math.round(element.y,2)+","+Math.round(element.z,2)+")");
+        }
+    }            
+    console.log(points);
+    //tree.query()
+}
 function setup() {
     let miCanvas = createCanvas(size, size);
     miCanvas.parent("division");
@@ -56,9 +96,21 @@ function draw() {
     }
 
 }
+function contar(){
+    let points = [];
+    qt.query(range,points);
+   
+    alert("en el rango hay "+points.length)
+  
+}
+
+
+
 
 function cuadrado(){
-    range = new Rectangle(random(size),random(size),30,30);
+    posx = random(size);
+    posy = random(size);
+    range = new Rectangle(posx,posy,30,30);
     stroke(0,0,255);
 
     rect(range.x,range.y,range.w *2 , range.h *2);

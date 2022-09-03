@@ -165,6 +165,11 @@ class Octree {
     }
 
     query(range,points_result){
+        if (!points_result){
+
+            points_result =[];
+        }
+        
         if(this.boundary.intersects(range)){
             for (let i = 0; i < this.points.length; i++) {
                 const element = this.points[i];
@@ -172,11 +177,13 @@ class Octree {
                     points_result.push(element);
                 }
             }
-        
-            for ( let i = 0 ; i < this.subTrees.length ; i++) {
+            if(this.subTrees.divided){
+                for ( let i = 0 ; i < this.subTrees.length ; i++) {
                 this.subTrees[ i ].query( range,points_result );
+                }
             }
         }
+        return points_result;
     }
 }
 
