@@ -64,12 +64,122 @@
 <body>
     <div id="controls">
         <button onclick="agregar()" class="button_top">+</button>
+        <button onclick="query()" id="query" class="button_top">?</button>
+        <button onclick="resultQuery()" class="button_top">Display Points</button>
     </div>
     <script>
 
         const limit = 40;
         const total = limit * 2;
         const maxPoints = 6;
+
+        const minQuery = new Point(0,0,0);
+        const maxQuery = new Point(20,20,20);
+
+        document.onkeydown = function(e){            
+            obj1 = scene.getObjectByName("p1", true);
+            obj2 = scene.getObjectByName("p2", true);
+            obj3 = scene.getObjectByName("p3", true);
+            obj4 = scene.getObjectByName("p4", true);
+            obj5 = scene.getObjectByName("p5", true);
+            
+            if(e.keyCode === 37){
+                minQuery.add(new Point(-1,0,0));
+                maxQuery.add(new Point(-1,0,0));
+                groupPlanes.position.x -=1; 
+            }else if(e.keyCode === 39){
+                minQuery.add(new Point(1,0,0));
+                maxQuery.add(new Point(1,0,0));
+                groupPlanes.position.x +=1;
+            }else if(e.keyCode === 101){
+                minQuery.add(new Point(0,0,-1));
+                maxQuery.add(new Point(0,0,-1));
+                groupPlanes.position.z -=1;
+            }else if(e.keyCode === 98){
+                minQuery.add(new Point(0,0,1));
+                maxQuery.add(new Point(0,0,1));
+                groupPlanes.position.z +=1;
+            }else if(e.keyCode === 40){
+                minQuery.add(new Point(0,-1,0));
+                maxQuery.add(new Point(0,-1,0));
+                groupPlanes.position.y -=1;
+            }else if(e.keyCode === 38){
+                minQuery.add(new Point(0,1,0));
+                maxQuery.add(new Point(0,1,0));
+                groupPlanes.position.y +=1;
+            }else if(e.keyCode === 88){ // view query box in x
+                let midpoint_x = (minQuery.x+maxQuery.x)/2;
+                let midpoint_y = (minQuery.y+maxQuery.y)/2;
+                let midpoint_z = (maxQuery.z+maxQuery.z)/2;
+                controls.object.position.set(midpoint_x, midpoint_y, maxQuery.z+14);
+                controls.target = new THREE.Vector3(midpoint_x, midpoint_y, midpoint_z);
+                
+            }else if(e.keyCode === 81){ // reset camera letter q
+                controls.object.position.set(0, 4.898587196589413e-15, 80);
+                controls.target = new THREE.Vector3(0, 0, 0);
+            }
+        }
+        function resultQuery(){
+            range = new Box(minQuery,maxQuery);
+            let points = [];
+            tree.query(range,points);
+            if(points.length==0){
+                alert("No existen puntos en el range.");
+            }else{
+                for (let i = 0; i < points.length; i++) {
+                    const element = points[i];
+                    alert("("+Math.round(element.x,2)+","+Math.round(element.y,2)+","+Math.round(element.z,2)+")");
+                }
+            }            
+            console.log(points);
+            //tree.query()
+        }
+        function drawPlane(p1x,p1y,p1z,p2x,p2y,p2z,name){
+            let vec1 = new THREE.Vector3(p1x, p1y, p1z);
+            let vec2 = new THREE.Vector3(p2x, p2y, p2z);
+
+            let size = new THREE.Vector3().subVectors(vec2, vec1);
+            let center = new THREE.Vector3().addVectors(vec1, vec2).multiplyScalar(0.5);
+
+            let planeWidth = 20;//Math.abs(size.x);
+            let planeHeight = 20;//Math.abs(size.y);
+            let planeGeom = new THREE.PlaneBufferGeometry(planeWidth, planeHeight, 2, 2);
+            let planeMat = new THREE.MeshBasicMaterial({color: "aqua",wireframe:"true"});
+            let plane = new THREE.Mesh(planeGeom, planeMat);
+            plane.position.copy(center);
+            
+            if(center.y==0 || center.y == planeWidth){
+                plane.rotateX(Math.PI/2);
+            }
+            if(center.x==0 || center.x == planeWidth){
+                plane.rotateY(Math.PI/2);
+            }
+                
+            plane.material.side = THREE.DoubleSide;
+            plane.name = name;
+            groupPlanes.add(plane);
+            return plane;
+        }
+        function query() {
+            let min = minQuery;
+            let max = maxQuery;
+
+            //v0-2
+            //drawPlane(min.x, min.y, max.z,max.x, max.y, max.z)
+            //v2-7
+            let objp1 = drawPlane(min.x, min.y, max.z ,max.x, min.y, min.z,"p1") 
+            //v3-4
+            let objp2 = drawPlane(max.x, min.y, max.z ,max.x, max.y, min.z,"p2") 
+            //v4-6
+            let objp3 =drawPlane(max.x, max.y, min.z,min.x, min.y, min.z,"p3")
+            //v4-1 
+            let objp4 =drawPlane(max.x, max.y, min.z,min.x, max.y, max.z,"p4")
+            //v2-5
+            let objp5 =drawPlane(min.x, min.y, max.z ,min.x, max.y, min.z,"p5") 
+            scene.add(groupPlanes);
+            document.getElementById("query").disabled = true;
+
+        }
         function agregar () {
             while(scene.children.length > 0){ 
                 removeObject3D(scene.children[0]);
@@ -208,7 +318,7 @@
         const controls = new OrbitControls( camera, renderer.domElement );
 
         camera.position.z = total;
-
+        const groupPlanes = new THREE.Group();
 
         let min = new Point( -limit , -limit , -limit );
         let max = new Point( limit , limit , limit );

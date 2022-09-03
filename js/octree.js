@@ -66,7 +66,7 @@ class Box {
 
     contains ( p ) {
         let isUp   = this.min.x <= p.x && this.min.y <= p.y && this.min.z <= p.z;
-        let isDown = this.max.x > p.x && this.max.y > p.y && this.max.z > p.z;
+        let isDown = this.max.x >= p.x && this.max.y >= p.y && this.max.z >= p.z;
         return isUp && isDown;
     }
 
@@ -111,7 +111,7 @@ class Octree {
 		}
 
         let point;
-
+/*
         while ( point = this.points.pop() ) {
             for ( let i = 0 ; i < this.subTrees.length ; i++ ) {
                 if ( this.subTrees[ i ].boundary.contains( point )) {
@@ -120,7 +120,7 @@ class Octree {
 
                 }
             }
-        }
+        }*/
         this.divided = true;
     }
 
@@ -163,6 +163,21 @@ class Octree {
             }
         }
     }
+
+    query(range,points_result){
+        if(this.boundary.intersects(range)){
+            for (let i = 0; i < this.points.length; i++) {
+                const element = this.points[i];
+                if(range.contains(element)){
+                    points_result.push(element);
+                }
+            }
+        
+            for ( let i = 0 ; i < this.subTrees.length ; i++) {
+                this.subTrees[ i ].query( range,points_result );
+            }
+        }
+    }
 }
 
 
@@ -178,3 +193,10 @@ ot.insert(d);
 ot.insert(e);
 ot.insert(f);
 ot.insert(g);
+console.log(ot);
+h = new Point(5,4,3);
+i = new Point(20,20,20);
+range = new Box(h,i);
+let points = [];
+ot.query(range,points);
+console.log(points);
