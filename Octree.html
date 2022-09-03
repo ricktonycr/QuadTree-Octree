@@ -18,7 +18,7 @@
     </div>
     <script>
 
-        const limit = 40;
+        const limit = 30;
         const total = limit * 2;
         const maxPoints = 6;
 
@@ -126,7 +126,10 @@
             //v2-5
             let objp5 =drawPlane(min.x, min.y, max.z ,min.x, max.y, min.z,"p5") 
             scene.add(groupPlanes);                         
-            document.getElementById("query").disabled = true        ;
+            document.getElementById("query").disabled = true     
+            
+            
+            ;
 
         }
         function agregar () {
